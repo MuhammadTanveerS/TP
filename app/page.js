@@ -13,9 +13,14 @@ export default function StudyNotesHomepage() {
     router.push('/x'); 
   };
 
+   const goToXi = () => {
+    router.push('/xi'); 
+  };
+
+
   const subjects = [
-    { name: 'X', notes: 24, color: 'bg-blue-100 text-blue-800' },
-    { name: 'XI', notes: 18, color: 'bg-green-100 text-green-800' },
+    { name: 'X', notes: 24, color: 'bg-blue-100 text-blue-800', link:'x' },
+    { name: 'XI', notes: 18, color: 'bg-green-100 text-green-800', link:'xi' },
     // { name: 'Chemistry', notes: 21, color: 'bg-purple-100 text-purple-800' },
     // { name: 'Biology', notes: 15, color: 'bg-pink-100 text-pink-800' },
     // { name: 'History', notes: 12, color: 'bg-yellow-100 text-yellow-800' },
@@ -129,23 +134,20 @@ export default function StudyNotesHomepage() {
         <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-white">Browse by Grade</h2>
-            <a href="#" className="text-blue-400 hover:text-blue-300 flex items-center">
-              View all <ChevronRight className="ml-1 h-4 w-4" />
-            </a>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjects.map((subject, index) => (
-              <div onClick={goToX} key={index} className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 hover:shadow-lg hover:border-gray-600 transition-all cursor-pointer">
+            
+              <div onClick={goToX} className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 hover:shadow-lg hover:border-gray-600 transition-all cursor-pointer">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-white">{subject.name}</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${subject.color}`}>
-                      {subject.notes} notes
+                    <h3 className="text-xl font-semibold text-white">Grade X</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium `}>
+                      View
                     </span>
                   </div>
                   <p className="text-gray-400 mb-4">
-                    Comprehensive study materials and notes for {subject.name.toLowerCase()}.
+                    Comprehensive study materials and notes for students of Grade X.
                   </p>
                   <div className="flex items-center text-sm text-gray-500">
                     <Users className="h-4 w-4 mr-1" />
@@ -153,7 +155,25 @@ export default function StudyNotesHomepage() {
                   </div>
                 </div>
               </div>
-            ))}
+
+              <div onClick={goToXi} className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 hover:shadow-lg hover:border-gray-600 transition-all cursor-pointer">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-white">Grade XI</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium `}>
+                      View
+                    </span>
+                  </div>
+                  <p className="text-gray-400 mb-4">
+                    Comprehensive study materials and notes for students of Grade XI.
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span>Updated weekly</span>
+                  </div>
+                </div>
+              </div>
+
           </div>
         </section>
 
@@ -161,9 +181,6 @@ export default function StudyNotesHomepage() {
         <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Recently Added</h2>
-            <a href="#" className="text-blue-600 hover:text-blue-700 flex items-center">
-              View all <ChevronRight className="ml-1 h-4 w-4" />
-            </a>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

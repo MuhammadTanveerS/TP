@@ -20,14 +20,11 @@ export default function AddNotesForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const subjects = [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology',
-    'History', 'Literature', 'Computer Science', 'Economics',
-    'Psychology', 'Philosophy', 'Engineering', 'Other'
+    'X', 'XI'
   ];
 
 
-  //CREATING DB REFERENCE
-  const dbref = collection(db, "XI")
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -48,13 +45,15 @@ export default function AddNotesForm() {
 
   const handleSubmit = async (e) => {
     setIsSubmitting(true);
+    //CREATING DB REFERENCE
+    const dbref = collection(db, formData.subject)
 
     try {
       setIsSubmitting(false);
       await addDoc(dbref, {
         chapter: formData.title,
         topic: formData.description,
-        link: "www.google.com"
+        link: formData.tags
       });
       alert("Document added");
       // Reset form
@@ -111,13 +110,13 @@ export default function AddNotesForm() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
               </button>
-              <button
+              {/* <button
                 onClick={handlePreview}
                 className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -143,14 +142,14 @@ export default function AddNotesForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Title *
+                  Chapter *
                 </label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="e.g., Calculus: Derivatives and Applications"
+                  placeholder=""
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   required
                 />
@@ -158,7 +157,7 @@ export default function AddNotesForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Subject *
+                  Class *
                 </label>
                 <select
                   name="subject"
@@ -167,7 +166,7 @@ export default function AddNotesForm() {
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   required
                 >
-                  <option value="">Select a subject</option>
+                  <option value="">Select a class</option>
                   {subjects.map(subject => (
                     <option key={subject} value={subject}>{subject}</option>
                   ))}
@@ -176,13 +175,13 @@ export default function AddNotesForm() {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Description *
+                  Topic *
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Provide a detailed description of your notes content, topics covered, and what students will learn..."
+                  placeholder=""
                   rows={4}
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
                   required
@@ -191,20 +190,20 @@ export default function AddNotesForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Tags
+                  URL
                 </label>
                 <input
                   type="text"
                   name="tags"
                   value={formData.tags}
                   onChange={handleInputChange}
-                  placeholder="e.g., calculus, derivatives, math, advanced"
+                  placeholder="e.g., www.example.com"
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separate tags with commas</p>
+                <p className="text-xs text-gray-500 mt-1">Google Drive Link</p>
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Difficulty Level
                 </label>
@@ -218,89 +217,14 @@ export default function AddNotesForm() {
                   <option value="intermediate">Intermediate</option>
                   <option value="advanced">Advanced</option>
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
 
-          {/* File Upload */}
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
-            <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-              <Upload className="h-5 w-5 mr-2" />
-              Upload Files
-            </h2>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  File Type
-                </label>
-                <select
-                  name="fileType"
-                  value={formData.fileType}
-                  onChange={handleInputChange}
-                  className="w-full md:w-auto px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                >
-                  <option value="pdf">PDF Document</option>
-                  <option value="docx">Word Document</option>
-                  <option value="pptx">PowerPoint</option>
-                  <option value="txt">Text File</option>
-                  <option value="image">Images</option>
-                </select>
-              </div>
-
-              {/* File Upload Area */}
-              <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-gray-500 transition-colors">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">Upload your files</h3>
-                <p className="text-gray-400 mb-4">Drag and drop files here, or click to browse</p>
-                <input
-                  type="file"
-                  multiple
-                  //onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer inline-block"
-                >
-                  Choose Files
-                </label>
-                <p className="text-xs text-gray-500 mt-2">
-                  Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG (Max 10MB each)
-                </p>
-              </div>
-
-              {/* Uploaded Files List */}
-              {uploadedFiles.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-300">Uploaded Files:</h4>
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
-                      <div className="flex items-center">
-                        <FileText className="h-4 w-4 text-blue-400 mr-2" />
-                        <span className="text-white text-sm">{file.name}</span>
-                        <span className="text-gray-400 text-xs ml-2">
-                          ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Settings */}
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
+          {/* <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
               <User className="h-5 w-5 mr-2" />
               Publication Settings
@@ -364,16 +288,16 @@ export default function AddNotesForm() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Submit Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-end">
-            <button
+            {/* <button
               type="button"
               className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
               Save as Draft
-            </button>
+            </button> */}
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
@@ -382,12 +306,12 @@ export default function AddNotesForm() {
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Publishing...
+                  Adding...
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Publish Notes
+                  Add
                 </>
               )}
             </button>

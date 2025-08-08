@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
-export default function StudentsPage() {
+export default function StudentsPage2() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "X"));
+        const querySnapshot = await getDocs(collection(db, "XI"));
         const studentData = [];
 
         querySnapshot.forEach((doc) => {
