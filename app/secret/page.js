@@ -11,7 +11,7 @@ export default function AddNotesForm() {
     subject: '',
     description: '',
     tags: '',
-    difficulty: 'intermediate',
+    difficulty: '',
     fileType: 'pdf',
     visibility: 'public'
   });
@@ -53,6 +53,7 @@ export default function AddNotesForm() {
       await addDoc(dbref, {
         chapter: formData.title,
         topic: formData.description,
+        description: formData.difficulty,
         link: formData.tags
       });
       alert("Document added");
@@ -62,7 +63,7 @@ export default function AddNotesForm() {
         subject: '',
         description: '',
         tags: '',
-        difficulty: 'intermediate',
+        difficulty: '',
         fileType: 'pdf',
         visibility: 'public'
       });
@@ -180,6 +181,21 @@ export default function AddNotesForm() {
                 <textarea
                   name="description"
                   value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder=""
+                  rows={4}
+                  className="w-full px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  name="difficulty"
+                  value={formData.difficulty}
                   onChange={handleInputChange}
                   placeholder=""
                   rows={4}

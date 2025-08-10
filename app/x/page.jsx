@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase"; // Make sure to adjust the path to your firebase config
 import { ArrowRight, ExternalLink, BookOpen, Zap, Target, Lightbulb, Code, Star, Heart, Rocket, FileText, Book, GraduationCap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+
+
 
 // Icon mapping function - maps topic names to icons
 const getTopicIcon = (topic) => {
@@ -18,7 +22,7 @@ const getTopicIcon = (topic) => {
     'literature': Book,
     'default': FileText
   };
-  
+
   const topicLower = (topic || '').toLowerCase();
   const matchedIcon = Object.keys(iconMap).find(key => topicLower.includes(key));
   return iconMap[matchedIcon] || iconMap.default;
@@ -53,12 +57,11 @@ const getTopicColor = (topic) => {
 const TopicIcon = ({ topic, isHovered }) => {
   const IconComponent = getTopicIcon(topic);
   const color = getTopicColor(topic);
-  
+
   return (
     <div
-      className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r ${color} flex items-center justify-center shadow-lg transform transition-all duration-300 ${
-        isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'
-      }`}
+      className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r ${color} flex items-center justify-center shadow-lg transform transition-all duration-300 ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'
+        }`}
     >
       <IconComponent className="w-6 h-6 text-white" />
     </div>
@@ -70,9 +73,8 @@ const TopicContent = ({ chapter, topic, isHovered }) => {
   return (
     <div className="flex-1 min-w-0">
       <h3
-        className={`text-lg font-semibold text-gray-900 dark:text-white mb-1 transition-colors duration-300 ${
-          isHovered ? 'text-gray-700 dark:text-gray-200' : ''
-        }`}
+        className={`text-lg font-semibold text-gray-900 dark:text-white mb-1 transition-colors duration-300 ${isHovered ? 'text-gray-700 dark:text-gray-200' : ''
+          }`}
       >
         {chapter || 'Untitled Chapter'}
       </h3>
@@ -86,21 +88,19 @@ const TopicContent = ({ chapter, topic, isHovered }) => {
 // 3. Action Button Component
 const ActionButton = ({ topic, isHovered }) => {
   const color = getTopicColor(topic);
-  
+
   return (
     <div
-      className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 ${
-        isHovered
+      className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 ${isHovered
           ? 'bg-gradient-to-r ' + color + ' shadow-lg scale-110'
           : 'group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-      }`}
+        }`}
     >
       <ArrowRight
-        className={`w-5 h-5 transition-all duration-300 ${
-          isHovered
+        className={`w-5 h-5 transition-all duration-300 ${isHovered
             ? 'text-white translate-x-1'
             : 'text-gray-600 dark:text-gray-400'
-        }`}
+          }`}
       />
     </div>
   );
@@ -121,14 +121,14 @@ const ShineEffect = () => {
 // 5. Topic Card Background Component
 const TopicCardBackground = ({ topic, isHovered }) => {
   const color = getTopicColor(topic);
-  
+
   return (
     <>
       {/* Gradient Background Overlay */}
       <div
         className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
       />
-      
+
       {/* Animated Border */}
       <div
         className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-all duration-300`}
@@ -151,7 +151,7 @@ const TopicItem = ({ note, index, isVisible }) => {
 
   const handleClick = () => {
     if (!note.link) return;
-    
+
     setIsPressed(true);
     setTimeout(() => {
       // Check if the link starts with http/https, if not add https://
@@ -163,23 +163,19 @@ const TopicItem = ({ note, index, isVisible }) => {
 
   return (
     <div
-      className={`transform transition-all duration-700 ease-out ${
-        isVisible
+      className={`transform transition-all duration-700 ease-out ${isVisible
           ? 'translate-y-0 opacity-100 scale-100'
           : 'translate-y-8 opacity-0 scale-95'
-      }`}
+        }`}
       style={{
         transitionDelay: `${index * 100}ms`
       }}
     >
       <div
-        className={`group relative bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-gray-100 dark:border-gray-800 transition-all duration-300 ease-out transform ${
-          note.link ? 'cursor-pointer' : 'cursor-default'
-        } ${
-          isHovered && note.link ? 'scale-105 -translate-y-2' : 'scale-100 translate-y-0'
-        } ${
-          isPressed ? 'scale-95' : ''
-        }`}
+        className={`group relative bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-gray-100 dark:border-gray-800 transition-all duration-300 ease-out transform ${note.link ? 'cursor-pointer' : 'cursor-default'
+          } ${isHovered && note.link ? 'scale-105 -translate-y-2' : 'scale-100 translate-y-0'
+          } ${isPressed ? 'scale-95' : ''
+          }`}
         onMouseEnter={() => note.link && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onMouseDown={() => note.link && setIsPressed(true)}
@@ -191,14 +187,14 @@ const TopicItem = ({ note, index, isVisible }) => {
         {/* Content */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1 min-w-0">
-            <TopicIcon 
-              topic={note.topic} 
-              isHovered={isHovered} 
+            <TopicIcon
+              topic={note.topic}
+              isHovered={isHovered}
             />
-            <TopicContent 
-              chapter={note.chapter} 
-              topic={note.topic} 
-              isHovered={isHovered} 
+            <TopicContent
+              chapter={note.topic}
+              topic={note.description}
+              isHovered={isHovered}
             />
           </div>
 
@@ -239,15 +235,22 @@ const TopicSkeleton = ({ index }) => (
 
 // 8. Page Header Component
 const PageHeader = ({ notesCount }) => {
+  const router = useRouter();
+
+  const goToHome = () => {
+    router.push('/');
+  };
   return (
     <div className="text-center mb-12">
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+      <div
+        onClick={goToHome}
+        className="cursor-pointer inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
         <GraduationCap className="w-8 h-8 text-white" />
       </div>
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
         Grade X Learning Materials
       </h1>
-      
+
     </div>
   );
 };
@@ -361,7 +364,7 @@ export default function StudentsPage2() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const querySnapshot = await getDocs(collection(db, "X"));
         const studentData = [];
 
@@ -370,7 +373,7 @@ export default function StudentsPage2() {
         });
 
         setNotes(studentData);
-        
+
         // Trigger staggered animation after data loads
         setTimeout(() => {
           studentData.forEach((_, index) => {
@@ -379,7 +382,7 @@ export default function StudentsPage2() {
             }, index * 100);
           });
         }, 100);
-        
+
       } catch (error) {
         console.error("Error fetching students:", error);
         setError("Failed to load study notes. Please check your connection and try again.");
@@ -395,17 +398,17 @@ export default function StudentsPage2() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <PageHeader notesCount={notes.length} />
-        
-        <TopicsList 
-          notes={notes} 
-          loading={loading} 
+
+        <TopicsList
+          notes={notes}
+          loading={loading}
           error={error}
-          visibleItems={visibleItems} 
+          visibleItems={visibleItems}
         />
 
-        <PageFooter 
-          notesCount={notes.length} 
-          isVisible={!loading && !error} 
+        <PageFooter
+          notesCount={notes.length}
+          isVisible={!loading && !error}
         />
       </div>
 

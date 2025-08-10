@@ -42,7 +42,7 @@ export default function StudyNotesHomepage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2 cursor-pointer">
               <BookOpen className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-white ">StudyNotes</span>
+              <span className="text-xl font-bold text-white ">IBA PSS</span>
             </div>
             
             {/* Desktop Navigation */}
@@ -178,7 +178,7 @@ export default function StudyNotesHomepage() {
         </section>
 
         {/* Recent Notes */}
-        <section className="mb-16">
+        {/* <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900">Recently Added</h2>
           </div>
@@ -205,7 +205,7 @@ export default function StudyNotesHomepage() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
         {/* Features Section */}
         {/* <section className="bg-white rounded-2xl shadow-sm border p-8">
@@ -296,7 +296,7 @@ export default function StudyNotesHomepage() {
           </div> */}
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 StudyNotes. Made with ❤️ for students.</p>
+            <p>&copy; 2025 IBA PSS. Made with ❤️ for students.</p>
           </div>
         </div>
       </footer>
