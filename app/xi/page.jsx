@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase"; // Make sure to adjust the path to your firebase config
 import { ArrowRight, ExternalLink, BookOpen, Zap, Target, Lightbulb, Code, Star, Heart, Rocket, FileText, Book, GraduationCap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Icon mapping function - maps topic names to icons
 const getTopicIcon = (topic) => {
@@ -18,7 +19,7 @@ const getTopicIcon = (topic) => {
     'literature': Book,
     'default': FileText
   };
-  
+
   const topicLower = (topic || '').toLowerCase();
   const matchedIcon = Object.keys(iconMap).find(key => topicLower.includes(key));
   return iconMap[matchedIcon] || iconMap.default;
@@ -44,21 +45,48 @@ const getTopicColor = (topic) => {
     .filter(([key]) => key !== 'default')
     .map(([, value]) => value);
 
-  // Pick one randomly
-  const randomIndex = Math.floor(Math.random() * colorValues.length);
+  // Pick one randomly based on topic for consistency
+  const hash = (topic || '').split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  const randomIndex = Math.abs(hash) % colorValues.length;
   return colorValues[randomIndex];
+};
+
+// Chapter Header Component
+const ChapterHeader = ({ chapterName, itemCount, isVisible }) => {
+  return (
+    <div
+      className={`transform transition-all duration-500 ease-out mb-6 ${
+        isVisible 
+          ? 'translate-y-0 opacity-100' 
+          : 'translate-y-4 opacity-0'
+      }`}
+    >
+      <div className="flex items-center space-x-4 mb-4">
+        <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          {chapterName}
+        </h2>
+        <div className="h-1 flex-1 bg-gradient-to-r from-purple-600 to-transparent rounded-full"></div>
+        <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+          {itemCount} {itemCount === 1 ? 'item' : 'items'}
+        </span>
+      </div>
+    </div>
+  );
 };
 
 // 1. Topic Icon Component
 const TopicIcon = ({ topic, isHovered }) => {
   const IconComponent = getTopicIcon(topic);
   const color = getTopicColor(topic);
-  
+
   return (
     <div
-      className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r ${color} flex items-center justify-center shadow-lg transform transition-all duration-300 ${
-        isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'
-      }`}
+      className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r ${color} flex items-center justify-center shadow-lg transform transition-all duration-300 ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'
+        }`}
     >
       <IconComponent className="w-6 h-6 text-white" />
     </div>
@@ -70,14 +98,13 @@ const TopicContent = ({ chapter, topic, isHovered }) => {
   return (
     <div className="flex-1 min-w-0">
       <h3
-        className={`text-lg font-semibold text-gray-900 dark:text-white mb-1 transition-colors duration-300 ${
-          isHovered ? 'text-gray-700 dark:text-gray-200' : ''
-        }`}
+        className={`text-lg font-semibold text-gray-900 dark:text-white mb-1 transition-colors duration-300 ${isHovered ? 'text-gray-700 dark:text-gray-200' : ''
+          }`}
       >
-        {chapter || 'Untitled Chapter'}
+        {topic || 'Untitled Topic'}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed truncate">
-        {topic || 'No topic description available'}
+        {chapter || 'No description available'}
       </p>
     </div>
   );
@@ -86,21 +113,19 @@ const TopicContent = ({ chapter, topic, isHovered }) => {
 // 3. Action Button Component
 const ActionButton = ({ topic, isHovered }) => {
   const color = getTopicColor(topic);
-  
+
   return (
     <div
-      className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 ${
-        isHovered
+      className={`flex-shrink-0 ml-4 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 ${isHovered
           ? 'bg-gradient-to-r ' + color + ' shadow-lg scale-110'
           : 'group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-      }`}
+        }`}
     >
       <ArrowRight
-        className={`w-5 h-5 transition-all duration-300 ${
-          isHovered
+        className={`w-5 h-5 transition-all duration-300 ${isHovered
             ? 'text-white translate-x-1'
             : 'text-gray-600 dark:text-gray-400'
-        }`}
+          }`}
       />
     </div>
   );
@@ -121,14 +146,14 @@ const ShineEffect = () => {
 // 5. Topic Card Background Component
 const TopicCardBackground = ({ topic, isHovered }) => {
   const color = getTopicColor(topic);
-  
+
   return (
     <>
       {/* Gradient Background Overlay */}
       <div
         className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
       />
-      
+
       {/* Animated Border */}
       <div
         className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-all duration-300`}
@@ -151,7 +176,7 @@ const TopicItem = ({ note, index, isVisible }) => {
 
   const handleClick = () => {
     if (!note.link) return;
-    
+
     setIsPressed(true);
     setTimeout(() => {
       // Check if the link starts with http/https, if not add https://
@@ -163,23 +188,19 @@ const TopicItem = ({ note, index, isVisible }) => {
 
   return (
     <div
-      className={`transform transition-all duration-700 ease-out ${
-        isVisible
+      className={`transform transition-all duration-700 ease-out ${isVisible
           ? 'translate-y-0 opacity-100 scale-100'
           : 'translate-y-8 opacity-0 scale-95'
-      }`}
+        }`}
       style={{
         transitionDelay: `${index * 100}ms`
       }}
     >
       <div
-        className={`group relative bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-gray-100 dark:border-gray-800 transition-all duration-300 ease-out transform ${
-          note.link ? 'cursor-pointer' : 'cursor-default'
-        } ${
-          isHovered && note.link ? 'scale-105 -translate-y-2' : 'scale-100 translate-y-0'
-        } ${
-          isPressed ? 'scale-95' : ''
-        }`}
+        className={`group relative bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg hover:shadow-2xl border border-gray-100 dark:border-gray-800 transition-all duration-300 ease-out transform ${note.link ? 'cursor-pointer' : 'cursor-default'
+          } ${isHovered && note.link ? 'scale-105 -translate-y-2' : 'scale-100 translate-y-0'
+          } ${isPressed ? 'scale-95' : ''
+          }`}
         onMouseEnter={() => note.link && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onMouseDown={() => note.link && setIsPressed(true)}
@@ -191,14 +212,14 @@ const TopicItem = ({ note, index, isVisible }) => {
         {/* Content */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1 min-w-0">
-            <TopicIcon 
-              topic={note.topic} 
-              isHovered={isHovered} 
+            <TopicIcon
+              topic={note.topic}
+              isHovered={isHovered}
             />
-            <TopicContent 
-              chapter={note.chapter} 
-              topic={note.topic} 
-              isHovered={isHovered} 
+            <TopicContent
+              chapter={note.description}
+              topic={note.topic}
+              isHovered={isHovered}
             />
           </div>
 
@@ -237,17 +258,51 @@ const TopicSkeleton = ({ index }) => (
   </div>
 );
 
+// Chapter Skeleton Component
+const ChapterSkeleton = ({ index }) => (
+  <div
+    className="animate-pulse mb-8"
+    style={{
+      animationDelay: `${index * 100}ms`
+    }}
+  >
+    <div className="flex items-center space-x-4 mb-6">
+      <div className="h-1 w-12 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+      <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded-lg w-48"></div>
+      <div className="h-1 flex-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+      <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+    </div>
+    <div className="space-y-4">
+      {Array.from({ length: 2 }, (_, itemIndex) => (
+        <TopicSkeleton key={`skeleton-${index}-${itemIndex}`} index={itemIndex} />
+      ))}
+    </div>
+  </div>
+);
+
 // 8. Page Header Component
-const PageHeader = ({ notesCount }) => {
+const PageHeader = ({ notesCount, chapterCount }) => {
+  const router = useRouter();
+
+  const goToHome = () => {
+    router.push('/');
+  };
+  
   return (
     <div className="text-center mb-12">
-      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+      <div
+        onClick={goToHome}
+        className="cursor-pointer inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
         <GraduationCap className="w-8 h-8 text-white" />
       </div>
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-        Grade XI Learning Materials
+        Grade X Learning Materials
       </h1>
-      
+      {chapterCount > 0 && (
+        <p className="text-gray-600 dark:text-gray-400 text-lg">
+          {chapterCount} {chapterCount === 1 ? 'Chapter' : 'Chapters'} • {notesCount} {notesCount === 1 ? 'Resource' : 'Resources'}
+        </p>
+      )}
     </div>
   );
 };
@@ -282,13 +337,44 @@ const EmptyState = () => (
   </div>
 );
 
-// 11. Topics List Component
-const TopicsList = ({ notes, loading, error, visibleItems }) => {
+// Function to group notes by chapter
+const groupNotesByChapter = (notes) => {
+  const grouped = notes.reduce((acc, note) => {
+    const chapter = note.chapter || 'Uncategorized';
+    if (!acc[chapter]) {
+      acc[chapter] = [];
+    }
+    acc[chapter].push(note);
+    return acc;
+  }, {});
+
+  // Sort chapters naturally (Chapter 1, Chapter 2, etc.)
+  const sortedChapters = Object.keys(grouped).sort((a, b) => {
+    // Extract numbers from chapter names for proper sorting
+    const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
+    const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
+    
+    if (aNum !== bNum) {
+      return aNum - bNum;
+    }
+    
+    // If no numbers or same numbers, sort alphabetically
+    return a.localeCompare(b);
+  });
+
+  return sortedChapters.map(chapter => ({
+    chapter,
+    notes: grouped[chapter]
+  }));
+};
+
+// 11. Topics List Component (Updated to show by chapters)
+const TopicsList = ({ notes, loading, error, visibleItems, visibleChapters }) => {
   if (loading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 6 }, (_, index) => (
-          <TopicSkeleton key={`skeleton-${index}`} index={index} />
+      <div className="space-y-8">
+        {Array.from({ length: 3 }, (_, index) => (
+          <ChapterSkeleton key={`chapter-skeleton-${index}`} index={index} />
         ))}
       </div>
     );
@@ -302,28 +388,44 @@ const TopicsList = ({ notes, loading, error, visibleItems }) => {
     return <EmptyState />;
   }
 
+  const groupedNotes = groupNotesByChapter(notes);
+
   return (
-    <div className="space-y-4">
-      {notes.map((note, index) => (
-        <TopicItem
-          key={note.id}
-          note={note}
-          index={index}
-          isVisible={visibleItems.has(index)}
-        />
+    <div className="space-y-8">
+      {groupedNotes.map((chapterGroup, chapterIndex) => (
+        <div key={chapterGroup.chapter} className="space-y-4">
+          <ChapterHeader
+            chapterName={chapterGroup.chapter}
+            itemCount={chapterGroup.notes.length}
+            isVisible={visibleChapters.has(chapterIndex)}
+          />
+          <div className="space-y-4 pl-4">
+            {chapterGroup.notes.map((note, noteIndex) => {
+              const globalIndex = notes.findIndex(n => n.id === note.id);
+              return (
+                <TopicItem
+                  key={note.id}
+                  note={note}
+                  index={globalIndex}
+                  isVisible={visibleItems.has(globalIndex)}
+                />
+              );
+            })}
+          </div>
+        </div>
       ))}
     </div>
   );
 };
 
 // 12. Page Footer Component
-const PageFooter = ({ notesCount, isVisible }) => {
+const PageFooter = ({ notesCount, chapterCount, isVisible }) => {
   if (!isVisible || notesCount === 0) return null;
 
   return (
     <div className="text-center mt-12 opacity-0 animate-fade-in-up" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
       <p className="text-gray-500 dark:text-gray-400">
-        Found {notesCount} study {notesCount === 1 ? 'note' : 'notes'} from Class XI
+        Found {notesCount} study {notesCount === 1 ? 'resource' : 'resources'} across {chapterCount} {chapterCount === 1 ? 'chapter' : 'chapters'} from Class X
       </p>
     </div>
   );
@@ -355,13 +457,14 @@ export default function StudentsPage2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [visibleItems, setVisibleItems] = useState(new Set());
+  const [visibleChapters, setVisibleChapters] = useState(new Set());
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const querySnapshot = await getDocs(collection(db, "XI"));
         const studentData = [];
 
@@ -370,16 +473,29 @@ export default function StudentsPage2() {
         });
 
         setNotes(studentData);
-        
+
+        // Group notes by chapter to get chapter count
+        const groupedNotes = groupNotesByChapter(studentData);
+
         // Trigger staggered animation after data loads
         setTimeout(() => {
-          studentData.forEach((_, index) => {
+          // First animate chapter headers
+          groupedNotes.forEach((_, chapterIndex) => {
             setTimeout(() => {
-              setVisibleItems(prev => new Set([...prev, index]));
-            }, index * 100);
+              setVisibleChapters(prev => new Set([...prev, chapterIndex]));
+            }, chapterIndex * 200);
           });
+
+          // Then animate individual items
+          setTimeout(() => {
+            studentData.forEach((_, index) => {
+              setTimeout(() => {
+                setVisibleItems(prev => new Set([...prev, index]));
+              }, index * 100);
+            });
+          }, 300);
         }, 100);
-        
+
       } catch (error) {
         console.error("Error fetching students:", error);
         setError("Failed to load study notes. Please check your connection and try again.");
@@ -391,21 +507,25 @@ export default function StudentsPage2() {
     fetchStudents();
   }, []);
 
+  const chapterCount = groupNotesByChapter(notes).length;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <PageHeader notesCount={notes.length} />
-        
-        <TopicsList 
-          notes={notes} 
-          loading={loading} 
+        <PageHeader notesCount={notes.length} chapterCount={chapterCount} />
+
+        <TopicsList
+          notes={notes}
+          loading={loading}
           error={error}
-          visibleItems={visibleItems} 
+          visibleItems={visibleItems}
+          visibleChapters={visibleChapters}
         />
 
-        <PageFooter 
-          notesCount={notes.length} 
-          isVisible={!loading && !error} 
+        <PageFooter
+          notesCount={notes.length}
+          chapterCount={chapterCount}
+          isVisible={!loading && !error}
         />
       </div>
 
